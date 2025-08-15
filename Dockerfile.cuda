@@ -44,10 +44,10 @@ COPY README.md /app/README.md
 COPY configs /app/configs
 
 RUN --mount=type=cache,target=/app/.cache/uv \
-    uv sync --locked --no-dev
+    sh -c "ulimit -n 65535 && uv sync --locked --no-dev"
 
 RUN --mount=type=cache,target=/app/.cache/uv \
-    uv sync --all-extras --locked --no-dev
+    sh -c "ulimit -n 65535 && uv sync --all-extras --locked --no-dev"
 
 FROM python:3.12-slim
 
