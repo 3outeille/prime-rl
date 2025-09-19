@@ -2,13 +2,13 @@ max_steps = 500
 batch_size = 1024
 micro_batch_size = 1
 seq_len = 4096
-rollouts_per_prompt = 32
+rollouts_per_example = 32
 mask_truncated_completions = true
 
 [model]
 name = "willcb/Qwen3-14B"
 
-[monitor.wandb]
+[wandb]
 project = "wordle"
 
 [environment]
@@ -19,7 +19,7 @@ id = "wordle"
 [sampling]
 max_tokens = 1024
 
-[monitor.wandb.log_extras]
+[wandb.log_extras]
 interval = 10
 
 [ckpt]

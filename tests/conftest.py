@@ -50,10 +50,10 @@ def setup_world():
 
 
 @pytest.fixture(scope="session")
-def outputs_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    outputs_dir = Path(os.environ.get("PYTEST_OUTPUTS_DIR", tmp_path_factory.mktemp("outputs")))
-    yield outputs_dir
-    shutil.rmtree(outputs_dir, ignore_errors=True)
+def output_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    output_dir = Path(os.environ.get("PYTEST_OUTPUT_DIR", tmp_path_factory.mktemp("outputs")))
+    yield output_dir
+    shutil.rmtree(output_dir, ignore_errors=True)
 
 
 @pytest.fixture(scope="session")
@@ -64,7 +64,7 @@ def hf_api() -> HfApi:
 
 @pytest.fixture(scope="module")
 def username() -> str:
-    return os.environ.get("USERNAME_CI", os.getlogin())
+    return os.environ.get("USERNAME_CI", os.environ.get("USER", "none"))
 
 
 @pytest.fixture(scope="module")

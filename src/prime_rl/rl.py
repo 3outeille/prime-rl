@@ -40,7 +40,7 @@ from prime_rl.utils.validation import (
     validate_shared_max_model_len,
     validate_shared_max_steps,
     validate_shared_model_name,
-    validate_shared_outputs_dir,
+    validate_shared_output_dir,
     validate_shared_wandb_config,
 )
 
@@ -86,6 +86,15 @@ class CheckpointConfig(BaseSettings):
     ] = None
 
 
+class ModelConfig(BaseSettings):
+    """Configures shared model settings."""
+
+    name: Annotated[
+        str,
+        Field(description="The name of the model to use."),
+    ] = "Qwen/Qwen3-0.6B"
+
+
 class RLConfig(BaseSettings):
     """Configures an RL training run."""
 
@@ -122,10 +131,10 @@ class RLConfig(BaseSettings):
 
     ### Shared configurations
 
-    outputs_dir: Annotated[
+    output_dir: Annotated[
         Path,
         Field(description="The directory to store the outputs. Should typically be set to an experiment identifier."),
-    ] = Path("outputs")  # NOTE: Must match `OUTPUTS_DIR` in `tmux.sh` to see logs
+    ] = Path("outputs")  # NOTE: Must match `OUTPUT_DIR` in `tmux.sh` to see logs
 
     ckpt: Annotated[
         CheckpointConfig | None,
@@ -141,10 +150,10 @@ class RLConfig(BaseSettings):
         ),
     ] = None
 
-    model_name: Annotated[
-        str | None,
+    model: Annotated[
+        ModelConfig | None,
         Field(
-            description="The name of the model to use. If None, will fallback to the model names specified on submodule configs."
+            description="Shared model configs. If None, will fallback to the model configs specified on submodule configs."
         ),
     ] = None
 
@@ -239,24 +248,24 @@ class RLConfig(BaseSettings):
     def auto_setup_wandb(self):
         # If specified, automatically use shared W&B project for orchestrator and trainer
         if self.wandb:
-            if not self.trainer.monitor.wandb:
-                self.trainer.monitor.wandb = WandbMonitorConfig()
-            if not self.orchestrator.monitor.wandb:
-                self.orchestrator.monitor.wandb = WandbMonitorConfig()
+            if not self.trainer.wandb:
+                self.trainer.wandb = WandbMonitorConfig()
+            if not self.orchestrator.wandb:
+                self.orchestrator.wandb = WandbMonitorConfig()
 
             if self.wandb.project:
-                self.trainer.monitor.wandb.project = self.wandb.project
-                self.orchestrator.monitor.wandb.project = self.wandb.project
+                self.trainer.wandb.project = self.wandb.project
+                self.orchestrator.wandb.project = self.wandb.project
 
             # If specified, automatically use shared W&B name for orchestrator and trainer with suffixes
             if self.wandb.name:
-                self.trainer.monitor.wandb.name = f"{self.wandb.name}-trainer"
-                self.orchestrator.monitor.wandb.name = f"{self.wandb.name}-orchestrator"
+                self.trainer.wandb.name = f"{self.wandb.name}-trainer"
+                self.orchestrator.wandb.name = f"{self.wandb.name}-orchestrator"
 
             # If specified, automatically use shared W&B offline mode for orchestrator and trainer
             if self.wandb.offline:
-                self.trainer.monitor.wandb.offline = self.wandb.offline
-                self.orchestrator.monitor.wandb.offline = self.wandb.offline
+                self.trainer.wandb.offline = self.wandb.offline
+                self.orchestrator.wandb.offline = self.wandb.offline
 
         validate_shared_wandb_config(self.trainer, self.orchestrator)
 
@@ -286,11 +295,11 @@ class RLConfig(BaseSettings):
     @model_validator(mode="after")
     def auto_setup_model(self):
         # Use the same model for trainer, orchestrator and inference
-        if self.model_name:
-            self.trainer.model.name = self.model_name
-            self.orchestrator.model.name = self.model_name
+        if self.model is not None and self.model.name:
+            self.trainer.model.name = self.model.name
+            self.orchestrator.model.name = self.model.name
             if self.inference:
-                self.inference.model.name = self.model_name
+                self.inference.model.name = self.model.name
 
         validate_shared_model_name(self.trainer, self.orchestrator, self.inference)
 
@@ -330,25 +339,25 @@ class RLConfig(BaseSettings):
         return self
 
     @model_validator(mode="after")
-    def auto_setup_outputs_dir(self):
+    def auto_setup_output_dir(self):
         # If specified, use the same outputs directory for trainer and orchestrator
-        if self.outputs_dir:
-            self.trainer.outputs_dir = self.outputs_dir
-            self.orchestrator.outputs_dir = self.outputs_dir
+        if self.output_dir:
+            self.trainer.output_dir = self.output_dir
+            self.orchestrator.output_dir = self.output_dir
 
-        validate_shared_outputs_dir(self.trainer, self.orchestrator)
+        validate_shared_output_dir(self.trainer, self.orchestrator)
 
         return self
 
     @model_validator(mode="after")
     def warn_wandb_resume_id_missing(self):
         if self.trainer.ckpt and self.trainer.ckpt.resume_step:
-            if self.trainer.monitor.wandb and not self.trainer.monitor.wandb.id:
+            if self.trainer.wandb and not self.trainer.wandb.id:
                 warnings.warn(
                     "W&B run ID is not set for trainer even though resuming training. The current run will be created as a new run."
                 )
         if self.orchestrator.ckpt and self.orchestrator.ckpt.resume_step:
-            if self.orchestrator.monitor.wandb and not self.orchestrator.monitor.wandb.id:
+            if self.orchestrator.wandb and not self.orchestrator.wandb.id:
                 warnings.warn(
                     "W&B run ID is not set for orchestrator even though resuming training. The current run will be created as a new run."
                 )
@@ -404,10 +413,10 @@ def rl(config: RLConfig):
     logger.debug(f"RL start command: {' '.join(start_command)}")
 
     # Prepare paths to communicate with the trainer
-    log_dir = get_log_dir(config.outputs_dir)
-    ckpt_dir = get_ckpt_dir(config.outputs_dir)
-    weights_dir = get_weights_dir(config.outputs_dir)
-    rollout_dir = get_rollout_dir(config.outputs_dir)
+    log_dir = get_log_dir(config.output_dir)
+    ckpt_dir = get_ckpt_dir(config.output_dir)
+    weights_dir = get_weights_dir(config.output_dir)
+    rollout_dir = get_rollout_dir(config.output_dir)
 
     # Clean up directories if specified
     if config.clean:
@@ -528,7 +537,8 @@ def rl(config: RLConfig):
             f"--rdzv-id={uuid.uuid4().hex}",
             "--nproc-per-node",
             str(config.trainer_gpus),
-            "src/prime_rl/trainer/rl/train.py",
+            "-m",
+            "prime_rl.trainer.rl.train",
             "@",
             trainer_file.as_posix(),
         ]

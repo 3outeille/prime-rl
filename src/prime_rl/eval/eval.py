@@ -1,12 +1,13 @@
 import asyncio
 
-from prime_rl.eval.config import EvalConfig
-from prime_rl.eval.utils import run_benchmark
+from prime_rl.eval.config import OfflineEvalConfig
+from prime_rl.eval.utils import run_evals
 from prime_rl.orchestrator.client import (
     check_has_model,
     check_health,
     reload_weights,
     setup_client,
+    update_weights,
 )
 from prime_rl.orchestrator.logger import setup_logger
 from prime_rl.utils.monitor import setup_monitor
@@ -15,20 +16,26 @@ from prime_rl.utils.utils import clean_exit
 
 
 @clean_exit
-async def eval(config: EvalConfig):
+async def eval(config: OfflineEvalConfig):
     # Initialize the logger
     logger = setup_logger(config.log)
     logger.info("Starting evaluation")
     logger.info(f"Model: {config.model}")
     logger.info(f"Sampling: {config.sampling}")
-    logger.info(f"Benchmarks: {config.benchmarks}")
+    logger.info(f"Eval IDs: {config.environment_ids}")
 
     # Initialize the monitor
-    logger.info(f"Initializing monitor ({config.monitor})")
-    monitor = setup_monitor(config.monitor, None, run_config=config)
+    logger.info(f"Initializing monitor ({config.wandb})")
+    setup_monitor(
+        config=config.wandb,
+        output_dir=None,
+        run_config=config,
+    )
 
     # Setup client
-    logger.info(f"Initializing OpenAI client ({config.client.host}:{config.client.port})")
+    logger.info(
+        f"Initializing OpenAI client (base_url={config.client.base_url}, api_key_var={config.client.api_key_var}, server_type={config.client.server_type})"
+    )
     client = setup_client(config.client)
 
     # Check health of the client
@@ -42,27 +49,50 @@ async def eval(config: EvalConfig):
     await reload_weights(client)
 
     # Run benchmarks on base model
-    logger.info(f"Running evals on base model {config.model.name}")
-    await asyncio.gather(
-        *[
-            run_benchmark(
-                client,
-                benchmark,
-                config.model,
-                config.sampling,
-                rollouts_per_prompt=rollouts_per_prompt,
-                ckpt_step=0,
-                monitor=monitor,
-            )
-            for benchmark, rollouts_per_prompt in zip(config.benchmarks, config.rollouts_per_prompt)
-        ]
-    )
+    if config.eval_base:
+        logger.info(f"Evaluating model {config.model.name}")
+        await run_evals(
+            client=client,
+            eval_config=config,
+            model_config=config.model,
+            sampling_config=config.sampling,
+            client_config=config.client,
+            output_dir=config.output_dir,
+            ckpt_step=0,
+        )
 
-    logger.info("Evaluation finished!")
+    # If specified, evaluate all checkpoints found in the weights directory
+    if config.weights_dir is not None:
+        logger.info(f"Evaluating weight checkpoints in {config.weights_dir}")
+        ckpt_steps = sorted([int(step_path.name.split("_")[-1]) for step_path in config.weights_dir.glob("step_*")])
+        logger.info(f"Found {len(ckpt_steps)} weight checkpoints (steps: {', '.join(map(str, ckpt_steps))})")
+
+        # Filter the steps to evaluate
+        if config.steps is not None:
+            ckpt_steps = [step for step in ckpt_steps if step in config.steps]
+
+        logger.info(f"Evaluating {len(ckpt_steps)} weight checkpoints (steps: {', '.join(map(str, ckpt_steps))})")
+        for ckpt_step in ckpt_steps[::-1]:
+            # Update the weights
+            logger.info(f"Evaluating model {config.model.name} at checkpoint {ckpt_step}")
+            await update_weights(client, config.weights_dir, ckpt_step)
+
+            # Run evals on checkpoint
+            await run_evals(
+                client=client,
+                eval_config=config,
+                model_config=config.model,
+                sampling_config=config.sampling,
+                client_config=config.client,
+                output_dir=config.output_dir,
+                ckpt_step=ckpt_step,
+            )
+
+    logger.success("Eval finished!")
 
 
 def main():
-    asyncio.run(eval(parse_argv(EvalConfig)))
+    asyncio.run(eval(parse_argv(OfflineEvalConfig)))
 
 
 if __name__ == "__main__":

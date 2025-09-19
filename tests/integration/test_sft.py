@@ -34,7 +34,7 @@ def wandb_project(username: str) -> str:
 @pytest.fixture(scope="module")
 def sft_process(
     run_process: Callable[[Command, Environment], ProcessResult],
-    outputs_dir: Path,
+    output_dir: Path,
     wandb_project: str,
     branch_name: str,
     commit_hash: str,
@@ -44,12 +44,12 @@ def sft_process(
     return run_process(
         SFT_CMD
         + [
-            "--monitor.wandb.project",
+            "--wandb.project",
             wandb_project,
-            "--monitor.wandb.name",
+            "--wandb.name",
             wandb_name,
-            "--outputs-dir",
-            outputs_dir.as_posix(),
+            "--output-dir",
+            output_dir.as_posix(),
         ],
         ENV,
         TIMEOUT,
@@ -60,7 +60,7 @@ def sft_process(
 def sft_resume_process(
     sft_process,  # Resume training can only start when regular SFT process is finished
     run_process: Callable[[Command, Environment, int], ProcessResult],
-    outputs_dir: Path,
+    output_dir: Path,
     wandb_project: str,
     branch_name: str,
     commit_hash: str,
@@ -70,12 +70,12 @@ def sft_resume_process(
     return run_process(
         SFT_RESUME_CMD
         + [
-            "--monitor.wandb.project",
+            "--wandb.project",
             wandb_project,
-            "--monitor.wandb.name",
+            "--wandb.name",
             wandb_name,
-            "--outputs-dir",
-            outputs_dir.as_posix(),
+            "--output-dir",
+            output_dir.as_posix(),
         ],
         ENV,
         TIMEOUT,
