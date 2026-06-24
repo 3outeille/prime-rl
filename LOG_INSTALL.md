@@ -42,6 +42,19 @@ transfer, so normal inference/training is unaffected. If disagg is ever needed o
 this box, mooncake will have to be built from source against GLIBC 2.31 or the
 machine upgraded.
 
+## tmux base-index (0 vs 1)
+
+prime-rl's launch tooling targets tmux windows/panes by index 0. If `~/.tmux.conf`
+sets 1-based indexing (a common default), the tooling targets a non-existent
+window/pane and fails. Force 0-based indexing in `~/.tmux.conf`:
+
+```tmux
+set -g base-index 0
+set -g pane-base-index 0
+```
+
+Then reload (`tmux source-file ~/.tmux.conf`) or restart the tmux server.
+
 ## Result
 
 - `deep-ep`, `deep-gemm`: removed (pyproject + lock + venv)
