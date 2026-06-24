@@ -34,6 +34,7 @@ prime = false
 
 [manifest]
 overrides = [
+    { name = "mooncake-transfer-engine", specifier = "==0.3.8" },
     { name = "nvidia-cudnn-cu12", specifier = ">=9.15" },
     { name = "nvidia-cutlass-dsl", specifier = ">=4.4.1" },
     { name = "openenv-core" },
@@ -2614,15 +2615,15 @@ wheels = [
 
 [[package]]
 name = "mooncake-transfer-engine"
-version = "0.3.11.post1"
+version = "0.3.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux') or (platform_machine == 'x86_64' and sys_platform == 'linux')" },
     { name = "requests", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux') or (platform_machine == 'x86_64' and sys_platform == 'linux')" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/82/6c/92d517ba157a02b2612b06a00c7e3f366d1050e41cc50e1bdefa382a7dc0/mooncake_transfer_engine-0.3.11.post1-cp312-cp312-manylinux_2_35_x86_64.whl", hash = "sha256:5ea50146d0d65f0274a406db49a570d187ad04760e054a49627bf84158038ac0", size = 42661963, upload-time = "2026-05-24T12:08:40.453Z" },
-    { url = "https://files.pythonhosted.org/packages/3a/a4/a187adcd485ff27bdbdb5c2b4d9cf210427bc74bcaacfc8226409db17535/mooncake_transfer_engine-0.3.11.post1-cp312-cp312-manylinux_2_39_aarch64.whl", hash = "sha256:1ccad9f44cf1a67f4e0494bd02f505503139ab606ecbe76cd6050d7a069247d5", size = 18089789, upload-time = "2026-05-24T16:19:01.828Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/f7/71fede7d679b7440946758f0fef079d2f3f893a1ea2ef65afef797be4c30/mooncake_transfer_engine-0.3.8-cp312-cp312-manylinux_2_17_aarch64.manylinux_2_35_aarch64.whl", hash = "sha256:8ae301378cb82cca770f3304b9a0b4a97bd6d9a5fd4817fc519c0bb824f3b3a6", size = 13671197, upload-time = "2025-12-26T09:56:54.481Z" },
+    { url = "https://files.pythonhosted.org/packages/8c/5c/b869db74890f30f6c7cc3897d3f3a2ea3e0954df2b0834dd45389601a492/mooncake_transfer_engine-0.3.8-cp312-cp312-manylinux_2_17_x86_64.manylinux_2_35_x86_64.whl", hash = "sha256:37354b69e87f84c3c0162839519041b64b39714adf52bf44eeda37a929a12962", size = 36415425, upload-time = "2025-12-26T09:53:47.351Z" },
 ]
 
 [[package]]

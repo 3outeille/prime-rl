@@ -176,6 +176,7 @@ override-dependencies = [
     "torch>=2.9.0",
     "openenv-core",
     "verifiers>=0.1.15.dev357",
+    "mooncake-transfer-engine==0.3.8",
 ]
 
 # ModelExpress 0.3.0 publishes protobuf<6 metadata, but its generated proto is
