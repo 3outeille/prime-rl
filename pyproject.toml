@@ -118,8 +118,9 @@ envs = [
     "tau2-bench-v1",
 ]
 disagg = [
-    "deep-ep ; platform_machine == 'x86_64'",
-    "deep-gemm ; platform_machine == 'x86_64'",
+    # deep-ep / deep-gemm prebuilt wheels require GLIBC >= 2.32; this machine is
+    # Ubuntu 20.04 (GLIBC 2.31). Removed so `uv sync` doesn't install unloadable
+    # native libs that crash vLLM's import. See LOG_INSTALL.md.
     "nixl",
     "nixl-cu12 ; platform_machine == 'x86_64'",
     "vllm-router ; platform_machine == 'x86_64'",

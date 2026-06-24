@@ -845,22 +845,6 @@ wheels = [
 ]
 
 [[package]]
-name = "deep-ep"
-version = "1.2.1+29d31c0"
-source = { url = "https://github.com/PrimeIntellect-ai/prime-rl/releases/download/v0.5.0/deep_ep-1.2.1+29d31c0-cp312-cp312-linux_x86_64.whl" }
-wheels = [
-    { url = "https://github.com/PrimeIntellect-ai/prime-rl/releases/download/v0.5.0/deep_ep-1.2.1+29d31c0-cp312-cp312-linux_x86_64.whl", hash = "sha256:a52b709d62c4dfc46a018b988724a7c10894125091aef596bf6d68e94c2b564e" },
-]
-
-[[package]]
-name = "deep-gemm"
-version = "2.5.0+891d57b"
-source = { url = "https://github.com/PrimeIntellect-ai/prime-rl/releases/download/v0.5.0/deep_gemm-2.5.0+891d57b-cp312-cp312-linux_x86_64.whl" }
-wheels = [
-    { url = "https://github.com/PrimeIntellect-ai/prime-rl/releases/download/v0.5.0/deep_gemm-2.5.0+891d57b-cp312-cp312-linux_x86_64.whl", hash = "sha256:3a9e4472b86e8e7e2c77cc76951c886bbe7a23a1f5908958969ab5b9c707a2f3" },
-]
-
-[[package]]
 name = "deepdiff"
 version = "9.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3653,8 +3637,6 @@ dependencies = [
 
 [package.optional-dependencies]
 all = [
-    { name = "deep-ep", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "deep-gemm", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "flash-attn", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "flash-attn-3", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux') or (platform_machine == 'x86_64' and sys_platform == 'linux')" },
     { name = "flash-attn-4", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux') or (platform_machine == 'x86_64' and sys_platform == 'linux')" },
@@ -3664,8 +3646,6 @@ all = [
     { name = "vllm-router", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
 ]
 disagg = [
-    { name = "deep-ep", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "deep-gemm", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "nixl", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux') or (platform_machine == 'x86_64' and sys_platform == 'linux')" },
     { name = "nixl-cu12", version = "0.10.1", source = { url = "https://github.com/PrimeIntellect-ai/prime-rl/releases/download/v0.5.0/nixl_cu12-0.10.1-cp312-cp312-linux_x86_64.whl" }, marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "vllm-router", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
@@ -3768,8 +3748,6 @@ requires-dist = [
     { name = "color-codeword", marker = "extra == 'envs'", editable = "deps/research-environments/environments/color_codeword" },
     { name = "color-codeword-v1", marker = "extra == 'envs'", editable = "deps/verifiers/environments/color_codeword_v1" },
     { name = "datasets", specifier = ">=4.0.0" },
-    { name = "deep-ep", marker = "platform_machine == 'x86_64' and extra == 'disagg'", url = "https://github.com/PrimeIntellect-ai/prime-rl/releases/download/v0.5.0/deep_ep-1.2.1+29d31c0-cp312-cp312-linux_x86_64.whl" },
-    { name = "deep-gemm", marker = "platform_machine == 'x86_64' and extra == 'disagg'", url = "https://github.com/PrimeIntellect-ai/prime-rl/releases/download/v0.5.0/deep_gemm-2.5.0+891d57b-cp312-cp312-linux_x86_64.whl" },
     { name = "deepdive", marker = "extra == 'envs'", editable = "deps/research-environments/environments/deepdive" },
     { name = "deepwiki-v1", marker = "extra == 'envs'", editable = "deps/verifiers/environments/deepwiki_v1" },
     { name = "dion", git = "https://github.com/samsja/dion.git?rev=d891eeb" },
